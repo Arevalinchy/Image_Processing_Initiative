@@ -1,0 +1,57 @@
+Dear all,
+
+(*Part 2*)
+As stated this afternoon, we will begin the practical part of this module.
+The goal of this part is to use disparity maps from stereoscopic images to improve the segmentation of these images.
+We will do it in three weeks, on step per week (with maybe a bonus part at the end).
+
+The first step consists in computing the disparity map itself. The disparity map is an image where is pixel has a value corresponding to the displacements of pixels from one image to the other on stereo images. So the construction algorithm is as follows :
+for each pixel of the image corresponding to the left eye (left image)
+	find the corresponding pixel in the right image
+	put the corresponding distance (displacement value) in the corresponding pixel of the map
+
+The main problem is: how to put in correspondance pixels of two different images ?
+There are two main categories of algorithm.
+The first one corresponds to algorithms that are called detectors. These algorithm compute for each pixel a vector of features (neighborhood mean, local histogram, …) and try to compare this vector to the ones computed in the second image. Vectors that match indicates matching pixels.
+OpenCV has functions for SIFT (https://docs.opencv.org/3.4/da/df5/tutorial_py_sift_intro.html), SURF (https://docs.opencv.org/3.4/df/dd2/tutorial_py_surf_intro.html) and ORB (https://docs.opencv.org/3.4/d1/d89/tutorial_py_orb.html).
+The second category is composed of block matching algorithms (https://en.wikipedia.org/wiki/Block-matching_algorithm). OpenCV uses these algorithms mostly for computer vision tasks (e.g. 3D reconstruction from a stereo camera). 
+  
+For this week, the goal is to construct a disparity map from the two images you took with your camera for the SBS/anaglyph exercice or from stereo images you can find on google.
+You will have to :
+1/ compute the disparity map (it’s simple under opencv : https://docs.opencv.org/master/dd/d53/tutorial_py_depthmap.html)
+2/ play with the different BM (Block Matching) functions that exist in opencv and with the different parameters. The goal is to obtain a good disparity map (smooth edges, not too noisy …). This is the difficult part !
+
+Please don’t hesitate to ask questions !
+
+(*Part 3*)
+Dear all,
+
+In this mail, I will begin with some information on stereovision systems and then give you the assignment for this week.
+
+Information part
+
+Congratulations, you obtained a disparity map ! 
+In our case, it is sufficient but in computer vision algorithms, especially for autonomous driving or vision for robots/drone, it is not. In these applications it is necessary to compute the distance between the autonomous system (drone/robot/car …) and various objects for example to avoid collisions. This is not directly possible on the disparity map. For that, from this disparity map, we need to compute a depth map. Most of the time, these systems are called stereovision systems.
+In order to do that, we need to :
+- calibrate the camera system (it will give us intrinsics parameters of the system, ie the characteristics of the camera, but also extrinsic parameters : the direction there are looking at, etc.). It can be automatically done by taking of a chessboard using the system. 
+- rectify the images (to avoid image deformation)
+- compute the depth map using trigonometrics (we know the displacement of objects from one image to the other via the disparity map and we know the distance between the two cameras, so we can compute the depth of this object). It is sometimes called the retro projection process.
+To go further, you can check to camera calibration and 3D reconstruction (depth map) OpenCV following these two links :
+https://docs.opencv.org/2.4/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html
+https://docs.opencv.org/master/dc/dbb/tutorial_py_calibration.html
+In those links and in most of the web sources I found, people confuse disparity maps with depth maps, because they merge the steps of calibration and reconstruction. A way to know the difference : these maps can be seen as gray levels images. If the closer an object is, the higher the values are, then this is a disparity map (higher values correspond to higher displacement, so to a closer object), if it is the opposite, then it is a depth map (lower values correspond to lower depths thus to closer objects).
+In conclusion, if you want to know relative values (meaning the relative position of the objects), you only need disparity maps but if you want measurements and/or distances, ie absolute positioning of objects, you need a depth map.
+
+Assignement part
+
+In our case, we only need a disparity map because we will use it only to have the shape of the objets in order to improve segmentation algorithms.
+The next step of our project is to segment the images you have.
+Segmentation algorithms can be classified into three categories :
+- pixel based algorithms, for example histogram-based ones. 
+- edge based algorithm (most of the time, it corresponds to high pass filters)
+- region based algorithm (watershed, split and merge, etc.)
+The goal for this week is to implement one of each.
+
+The problem is that segmentation algorithms are sensitive to noise. Next week, we will try to make them more robust using the disparity maps.
+
+
